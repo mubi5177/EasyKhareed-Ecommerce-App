@@ -387,7 +387,7 @@ Future<Widget> buildHomeCities(context) async {
   List<Widget> x = [];
 
   var response = await http
-      .get(Uri.parse("https://easykhareeddev.einnovention.tech/api/cities"));
+      .get(Uri.parse("https://easykhareed.com/api/cities"));
   if (response.statusCode == 200) {
     List data = json.decode(response.body)['data'];
 
@@ -458,7 +458,7 @@ Future<Widget> buildHomeCities(context) async {
     List<Widget> x = [];
 
     var response = await http.get(
-        Uri.parse("https://easykhareeddev.einnovention.tech/api/allProducts"));
+        Uri.parse("https://easykhareed.com/api/allProducts"));
     if (response.statusCode == 200) {
       List data = json.decode(response.body)['data'];
 

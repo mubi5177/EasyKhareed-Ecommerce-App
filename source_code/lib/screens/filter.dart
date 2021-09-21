@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:active_ecommerce_flutter/ui_elements/product_card.dart';
 import 'package:active_ecommerce_flutter/ui_elements/shop_square_card.dart';
 import 'package:active_ecommerce_flutter/ui_elements/brand_square_card.dart';
+import 'package:active_ecommerce_flutter/ui_elements/cities_square_card.dart';
 import 'package:toast/toast.dart';
 import 'package:active_ecommerce_flutter/custom/toast_component.dart';
 import 'package:active_ecommerce_flutter/repositories/category_repository.dart';
 import 'package:active_ecommerce_flutter/repositories/brand_repository.dart';
+import 'package:active_ecommerce_flutter/repositories/city_product_repository.dart';
 import 'package:active_ecommerce_flutter/repositories/shop_repository.dart';
 import 'package:active_ecommerce_flutter/helpers/reg_ex_inpur_formatter.dart';
 import 'package:active_ecommerce_flutter/repositories/product_repository.dart';
@@ -48,6 +50,7 @@ class _FilterState extends State<Filter> {
   ScrollController _productScrollController = ScrollController();
   ScrollController _brandScrollController = ScrollController();
   ScrollController _shopScrollController = ScrollController();
+  ScrollController _citiesScrollController = ScrollController();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -59,6 +62,7 @@ class _FilterState extends State<Filter> {
   List<DropdownMenuItem<WhichFilter>> _dropdownWhichFilterItems;
   List<dynamic> _selectedCategories = [];
   List<dynamic> _selectedBrands = [];
+  List<dynamic> _selectedCities = [];
 
   final TextEditingController _searchController = new TextEditingController();
   final TextEditingController _minPriceController = new TextEditingController();
@@ -69,6 +73,8 @@ class _FilterState extends State<Filter> {
   bool _filteredBrandsCalled = false;
   List<dynamic> _filterCategoryList = List();
   bool _filteredCategoriesCalled = false;
+    List<dynamic> _filterCitiesList = List();
+  bool _filteredCitiesCalled = false;
 
   //----------------------------------------
   String _searchKey = "";
@@ -81,9 +87,16 @@ class _FilterState extends State<Filter> {
 
   List<dynamic> _brandList = [];
   bool _isBrandInitial = true;
-  int _brandPage = 1;
-  int _totalBrandData = 0;
+  int _brandPage = 1;  
+  int _totalBrandData = 0;  
   bool _showBrandLoadingContainer = false;
+
+  List<dynamic> _citiesList = [];
+  bool _isCitiesInitial = true;
+  int _citiesPage = 1;
+  int _totalCitiesData = 0;
+  int cityid=0;
+  bool _showCitiesLoadingContainer = false;
 
   List<dynamic> _shopList = [];
   bool _isShopInitial = true;
@@ -99,6 +112,14 @@ class _FilterState extends State<Filter> {
     _filteredBrandsCalled = true;
     setState(() {});
   }
+
+   fetchFilteredCities() async {
+    var filteredCitiesResponse = await CityRepository().getFilterPageCities();
+    _filterCitiesList.addAll(filteredCitiesResponse.id);
+    _filteredCitiesCalled = true;
+    setState(() {});
+  }
+
 
   fetchFilteredCategories() async {
     var filteredCategoriesResponse =
@@ -120,6 +141,7 @@ class _FilterState extends State<Filter> {
     _productScrollController.dispose();
     _brandScrollController.dispose();
     _shopScrollController.dispose();
+    _citiesScrollController.dispose();
     super.dispose();
   }
 
@@ -139,11 +161,14 @@ class _FilterState extends State<Filter> {
 
     fetchFilteredCategories();
     fetchFilteredBrands();
+     fetchFilteredCities();
 
     if (_selectedFilter.option_key == "sellers") {
       fetchShopData();
     } else if (_selectedFilter.option_key == "brands") {
       fetchBrandData();
+    }else if(_selectedFilter.option_key == "cities"){
+       fetchCitiesData();
     } else {
       fetchProductData();
     }
@@ -182,6 +207,18 @@ class _FilterState extends State<Filter> {
         fetchShopData();
       }
     });
+     _citiesScrollController.addListener(() {
+      if (_citiesScrollController.position.pixels ==
+          _citiesScrollController.position.maxScrollExtent) {
+        setState(() {
+          _shopPage++;
+        });
+        _showCitiesLoadingContainer = true;
+        fetchCitiesData();
+      }
+    });
+
+    
   }
 
   fetchProductData() async {
@@ -212,6 +249,24 @@ class _FilterState extends State<Filter> {
     setState(() {});
   }
 
+  fetchCitiesData() async {
+    var citiesResponse =
+        await CityRepository().getFilterPageCities(name: _searchKey);
+    _citiesList.addAll(citiesResponse.id);
+    _isCitiesInitial = false;
+    _totalCitiesData = citiesResponse.id as int;
+    _showCitiesLoadingContainer = false;
+    setState(() {});
+  }
+
+  resetCitiesList() {
+    _citiesList.clear();
+    _isCitiesInitial = true;
+    _totalCitiesData = 0;
+    _citiesPage = 1;
+    _showCitiesLoadingContainer = false;
+    setState(() {});
+  }
   fetchBrandData() async {
     var brandResponse =
         await BrandRepository().getBrands(page: _brandPage, name: _searchKey);
@@ -257,6 +312,11 @@ class _FilterState extends State<Filter> {
     fetchProductData();
   }
 
+   Future<void> _onCitiesListRefresh() async {
+    resetCitiesList();
+    fetchCitiesData();
+  }
+
   Future<void> _onBrandListRefresh() async {
     resetBrandList();
     fetchBrandData();
@@ -279,7 +339,10 @@ class _FilterState extends State<Filter> {
     } else if (_selectedFilter.option_key == "brands") {
       resetBrandList();
       fetchBrandData();
-    } else {
+    }else if(_selectedFilter.option_key == "cities"){
+       resetCitiesList();
+    fetchCitiesData();
+    } else{
       resetProductList();
       fetchProductData();
     }
@@ -297,6 +360,9 @@ class _FilterState extends State<Filter> {
     } else if (_selectedFilter.option_key == "brands") {
       resetBrandList();
       fetchBrandData();
+    }else if(_selectedFilter.option_key == "cities"){
+       resetCitiesList();
+    fetchCitiesData();
     } else {
       resetProductList();
       fetchProductData();
@@ -329,7 +395,18 @@ class _FilterState extends State<Filter> {
       ),
     );
   }
-
+  Container buildCitiesLoadingContainer() {
+    return Container(
+      height: _showCitiesLoadingContainer ? 36 : 0,
+      width: double.infinity,
+      color: Colors.white,
+      child: Center(
+        child: Text(_totalCitiesData == _citiesList.length
+            ? "No More Cities"
+            : "Loading More Cities ..."),
+      ),
+    );
+  }
   Container buildBrandLoadingContainer() {
     return Container(
       height: _showBrandLoadingContainer ? 36 : 0,
@@ -369,7 +446,8 @@ class _FilterState extends State<Filter> {
       backgroundColor: Colors.white,
       body: Stack(overflow: Overflow.visible, children: [
         _selectedFilter.option_key == 'product'
-            ? buildProductList()
+            ? buildProductList():_selectedFilter.option_key == 'cities'
+            ? buildCitiesList()
             : (_selectedFilter.option_key == 'brands'
                 ? buildBrandList()
                 : buildShopList()),
@@ -382,7 +460,8 @@ class _FilterState extends State<Filter> {
         Align(
             alignment: Alignment.bottomCenter,
             child: _selectedFilter.option_key == 'product'
-                ? buildProductLoadingContainer()
+                ? buildProductLoadingContainer(): _selectedFilter.option_key == 'cities'
+                ? buildCitiesLoadingContainer()
                 : (_selectedFilter.option_key == 'brands'
                     ? buildBrandLoadingContainer()
                     : buildShopLoadingContainer()))
@@ -453,7 +532,7 @@ class _FilterState extends State<Filter> {
                     context,
                     gravity: Toast.CENTER,
                     duration: Toast.LENGTH_LONG);
-            ;
+            
           },
           child: Container(
             decoration: BoxDecoration(
@@ -869,7 +948,7 @@ class _FilterState extends State<Filter> {
                             ),
                           )
                         : SingleChildScrollView(
-                            // child: buildFilterCategoryList(),
+                             child: buildFilterCitiesList(),
                           ),
                   ]),
                 )
@@ -997,6 +1076,39 @@ class _FilterState extends State<Filter> {
       ],
     );
   }
+  
+  
+  ListView buildFilterCitiesList() {
+    return ListView(
+      padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      children: <Widget>[
+        ..._filterCitiesList
+            .map(
+              (cities) => CheckboxListTile(
+                controlAffinity: ListTileControlAffinity.leading,
+                dense: true,
+                title: Text(cities.name),
+                value: _selectedCities.contains(cities.id),
+                onChanged: (bool value) {
+                  if (value) {
+                    setState(() {
+                      _selectedBrands.add(cities.id);
+                    });
+                  } else {
+                    setState(() {
+                      _selectedBrands.remove(cities.id);
+                    });
+                  }
+                },
+              ),
+            )
+            .toList()
+      ],
+    );
+  }
+
 
   Container buildProductList() {
     return Container(
@@ -1060,6 +1172,74 @@ class _FilterState extends State<Filter> {
       );
     } else if (_totalProductData == 0) {
       return Center(child: Text("No product is available"));
+    } else {
+      return Container(); // should never be happening
+    }
+  }
+
+
+  
+  Container buildCitiesList() {
+    return Container(
+      child: Column(
+        children: [
+          Expanded(
+            child: buildCitiesScrollableList(),
+          )
+        ],
+      ),
+    );
+  }
+
+  buildCitiesScrollableList() {
+    if (_isCitiesInitial && _citiesList.length == 0) {
+      return SingleChildScrollView(
+          child: ShimmerHelper()
+              .buildSquareGridShimmer(scontroller: _scrollController));
+    } else if (_brandList.length > 0) {
+      return RefreshIndicator(
+        color: Colors.white,
+        backgroundColor: MyTheme.accent_color,
+        onRefresh: _onCitiesListRefresh,
+        child: SingleChildScrollView(
+          controller: _brandScrollController,
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+          child: Column(
+            children: [
+              SizedBox(
+                  height:
+                      MediaQuery.of(context).viewPadding.top > 40 ? 180 : 135
+                  //MediaQuery.of(context).viewPadding.top is the statusbar height, with a notch phone it results almost 50, without a notch it shows 24.0.For safety we have checked if its greater than thirty
+                  ),
+              GridView.builder(
+                // 2
+                //addAutomaticKeepAlives: true,
+                itemCount: _brandList.length,
+                controller: _scrollController,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 1),
+                padding: EdgeInsets.all(8),
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  // 3
+                  return CitiesSquareCard(
+                    id:_citiesList[index].id,
+                    image: _citiesList[index].image,
+                    name: _citiesList[index].name,
+                  );
+                },
+              )
+            ],
+          ),
+        ),
+      );
+    } else if (_totalCitiesData == 0) {
+      return Center(child: Text("No brand is available"));
     } else {
       return Container(); // should never be happening
     }

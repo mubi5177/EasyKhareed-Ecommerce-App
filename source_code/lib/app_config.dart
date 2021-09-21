@@ -51,7 +51,7 @@ class AppConfig {
 
   //do not configure these below
   static const String API_ENDPATH = "api/v2";
-  static const String API_ENDPATHH = "api/v1";
+  // static const String API_ENDPATHH = "api/v1";
   static const String PUBLIC_FOLDER = "public";
   static const String PROTOCOL = HTTPS ? "https://" : "http://";
   static const String RAW_BASE_URL = "${PROTOCOL}${DOMAIN_PATH}";
