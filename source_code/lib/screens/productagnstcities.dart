@@ -93,7 +93,7 @@ class _ProductCitiesState extends State<ProductCities> {
     List<Widget> x = [];
 
     var response = await http.get(
-        Uri.parse("https://easykhareeddev.einnovention.tech/api/city/${widget.id}"));
+        Uri.parse("https://easykhareed.com/api/city/${widget.id}"));
     if (response.statusCode == 200) {
       List data = json.decode(response.body)['data'];
 

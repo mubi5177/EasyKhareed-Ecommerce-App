@@ -399,7 +399,7 @@ Future<Widget> buildHomeCities(context) async {
               onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ProductCities(
-                      id: widget.id,
+                      id: element['id'],
                     );
                   }));
                 },
