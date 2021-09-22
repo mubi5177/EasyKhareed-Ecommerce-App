@@ -211,7 +211,7 @@ class _FilterState extends State<Filter> {
       if (_citiesScrollController.position.pixels ==
           _citiesScrollController.position.maxScrollExtent) {
         setState(() {
-          _shopPage++;
+          _citiesPage++;
         });
         _showCitiesLoadingContainer = true;
         fetchCitiesData();
@@ -222,8 +222,7 @@ class _FilterState extends State<Filter> {
   }
 
   fetchProductData() async {
-    //print("sc:"+_selectedCategories.join(",").toString());
-    //print("sb:"+_selectedBrands.join(",").toString());
+    
     var productResponse = await ProductRepository().getFilteredProducts(
         page: _productPage,
         name: _searchKey,
@@ -251,7 +250,7 @@ class _FilterState extends State<Filter> {
 
   fetchCitiesData() async {
     var citiesResponse =
-        await CityRepository().getFilterPageCities(name: _searchKey);
+        await CityRepository().getCities(name: _searchKey,page: _citiesPage);
     _citiesList.addAll(citiesResponse.id);
     _isCitiesInitial = false;
     _totalCitiesData = citiesResponse.id as int;
@@ -937,7 +936,7 @@ class _FilterState extends State<Filter> {
                             fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    _filterCategoryList.length == 0
+                    _filterCitiesList.length == 0
                         ? Container(
                             height: 100,
                             child: Center(
@@ -976,6 +975,7 @@ class _FilterState extends State<Filter> {
                       setState(() {
                         _selectedCategories.clear();
                         _selectedBrands.clear();
+                        _selectedCities.clear();
                       });
                     },
                   ),

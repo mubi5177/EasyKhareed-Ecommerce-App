@@ -59,7 +59,7 @@ class _CitiesProductState extends State<CitiesProduct> {
   }
 
   fetchData() async {
-    var citiesResponse = await CityRepository().getFilterPageCities(name: _searchKey);
+    var citiesResponse = await CityRepository().getCities(name: _searchKey,page:_page );
     _citiesList.addAll(citiesResponse.id);
     _isInitial = false;
     _totalData = citiesResponse.id as int ;
