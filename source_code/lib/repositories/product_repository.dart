@@ -10,6 +10,8 @@ class ProductRepository {
     final response = await http.get("https://easykhareed.com/api/v1/products/featured");
     return productMiniResponseFromJson(response.body);
   }
+   
+   
 
   Future<ProductMiniResponse> getBestSellingProducts() async {
     final response =

@@ -325,6 +325,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           8.0,
                           0.0,
                         ),
+                       
                         child: FutureBuilder(
                           future: buildHomeAllProducts(context),
                           builder: ((context, snap) {
@@ -399,7 +400,7 @@ Future<Widget> buildHomeCities(context) async {
               onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ProductCities(
-                      id: element['id'],
+                      id: widget.id,
                     );
                   }));
                 },
@@ -472,8 +473,9 @@ Future<Widget> buildHomeCities(context) async {
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ProductDetails(
-                      id: element['id'],
-                     
+                      
+                      id: element['id'],  
+                   
                        
                     );
                   }));
@@ -552,6 +554,8 @@ Future<Widget> buildHomeCities(context) async {
      return Text("No Products Available!");
   
   }
+  
+ 
 
   buildHomeFeaturedProducts(context) {
     return FutureBuilder(
