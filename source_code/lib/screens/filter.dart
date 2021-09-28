@@ -456,14 +456,14 @@ class _FilterState extends State<Filter> {
           right: 0.0,
           child: buildAppBar(context),
         ),
-        Align(
+Align(
             alignment: Alignment.bottomCenter,
             child: _selectedFilter.option_key == 'product'
                 ? buildProductLoadingContainer(): _selectedFilter.option_key == 'cities'
                 ? buildCitiesLoadingContainer()
                 : (_selectedFilter.option_key == 'brands'
                     ? buildBrandLoadingContainer()
-                    : buildShopLoadingContainer()))
+                    : buildShopLoadingContainer()))     
       ]),
     );
   }
